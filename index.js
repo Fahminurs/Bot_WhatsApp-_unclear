@@ -1,4 +1,3 @@
-// Menampahkan Dependencies
 const {
     default: makeWASocket,
     DisconnectReason,
@@ -6,29 +5,6 @@ const {
 } = require("@adiwajshing/baileys");
 const { Boom } = require("@hapi/boom");
 const { state, saveState } = useSingleFileAuthState("./login.json");
-
-//Bagian Koding ChatGPT
-const { Configuration, OpenAIApi } = require("openai");
-const configuration = new Configuration({
-    apiKey: 'API CHAT GPT',
-});
-const openai = new OpenAIApi(configuration);
-
-//Fungsi OpenAI ChatGPT untuk Mendapatkan Respon
-async function generateResponse(text) {
-    const response = await openai.createCompletion({
-        model: "text-davinci-003",
-        prompt: "\"\"\"\nUtil exposes the following:\nutil.openai() -> authenticates & returns the openai module, which has the following functions:\nopenai.Completion.create(\n    prompt=\"<my prompt>\", # The prompt to start completing from\n    max_tokens=123, # The max number of tokens to generate\n    temperature=1.0 # A measure of randomness\n    echo=True, # Whether to return the prompt in addition to the generated completion\n)\n\"\"\"\nimport util\n\"\"\"\nCreate an OpenAI completion starting from the prompt \"Once upon an AI\", no more than 5 tokens. Does not include the prompt.\n\"\"\"\n",
-        temperature: 0,
-        max_tokens: 64,
-        top_p: 1.0,
-        frequency_penalty: 0.0,
-        presence_penalty: 0.0,
-        stop: ["\"\"\""],
-    });
-    return response.data.choices[0].text;
-}
-
 
 async function connectToWhatsApp() {
 
@@ -39,8 +15,8 @@ async function connectToWhatsApp() {
         defaultQuertTimeoutMs: undefined
     });
 
-    //Fungsi untuk Mantau Koneksi Update
-    sock.ev.on("connection.update", (update) => {
+      //Fungsi untuk Mantau Koneksi Update
+      sock.ev.on("connection.update", (update) => {
         const { connection, lastDisconnect } = update;
         if (connection === "close") {
             const shouldReconnect = (lastDisconnect.error = Boom)?.output?.statusCode !== DisconnectReason.loggedOut;
@@ -50,10 +26,13 @@ async function connectToWhatsApp() {
             }
         }
         else if (connection === "open") {
-            console.log("Koneksi tersambung!")
+            console.log("<===========> Koneksi tersambung! <===========>")
         }
     });
     sock.ev.on("creds.update", saveState);
+//
+
+
 
     //Fungsi Untuk Mantau Pesan Masuk
     sock.ev.on("messages.upsert", async ({ messages, type }) => {
@@ -70,72 +49,87 @@ async function connectToWhatsApp() {
                 }
                 incomingMessages = incomingMessages.toLowerCase();
 
-                //Dapatkan Info Pesan dari Grup atau Bukan 
-                //Dan Pesan Menyebut bot atau Tidak
-                const isMessageFromGroup = senderNumber.includes("@g.us");
-                const isMessageMentionBot = incomingMessages.includes("@6282126083338");
 
                 //Tampilkan nomer pengirim dan isi pesan
                 console.log("Nomer Pengirim:", senderNumber);
                 console.log("Isi Pesan:", incomingMessages);
+                let text = 
+                ' ✪✪✪ *ֆɨʟǟɦӄǟռ քɨʟɨɦ ʍɛռʊ :* ✪✪✪\n' +
+                '\n*Menanyakan siapa kamu*\n' +
+                '==> Masukkan "*_siapa kamu_*" \n' +
+                '=҉=҉=҉=҉=҉=҉=҉=҉=҉=҉=҉=҉=҉=҉=҉=҉\n' +
+                '1. Sekarang Tanggal Berapa?\n' +
+                '2. Ping!\n' +
+                '3. Tentang Bot\n' +
+                '=҉=҉=҉=҉=҉=҉=҉=҉=҉=҉=҉=҉=҉=҉=҉=҉\n' +
+                '*Untuk kembali dari pilihan*\n'+
+                '==> Masukkan *_kembali_*\n' +
+                '*Untuk keluar dari pilihan menu*\n'+
+                '==> masukkan *_keluar_*';
+              
 
-                //Tampilkan Status Pesan dari Grup atau Bukan
-                //Tampilkan Status Pesan Mengebut Bot atau Tidak
-                console.log("Apakah Pesan dari Grup? ", isMessageFromGroup);
-                console.log("Apakah Pesan Menyebut Bot? ", isMessageMentionBot);
-
-                //Kalo misalkan nanya langsung ke Bot / JAPRI
-                if (!isMessageFromGroup) {
-
-                    //Jika ada yang mengirim pesan mengandung kata 'siapa'
-                    if (incomingMessages.includes('siapa') && incomingMessages.includes('kamu')) {
-                        await sock.sendMessage(
-                            senderNumber,
-                            { text: "Saya Bot!" },
-                            { quoted: messages[0] },
-                            2000
-                        );
-                    } else {
-                        async function main() {
-                            const result = await generateResponse(incomingMessages);
-                            console.log(result);
-                            await sock.sendMessage(
+            if (incomingMessages === 'menu') {
+              
+                await sock.sendMessage(senderNumber, { text: text }, { quoted: messages[0] });
+            } else {
+                switch (incomingMessages) {
+                    case "1":
+                        const today = new Date();
+                        const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+                        const date = today.toLocaleDateString('id-ID', dateOptions);
+                        const text = `Hari ini adalah ${date}.`;
+                        await sock.sendMessage(senderNumber, { text: text });
+                        break;
+                    case "2":
+                        let pingText = '';
+                        for (let i = 0; i < 1000; i++) {
+                            pingText += i + '. PONG!\n';
+                        }
+                        await sock.sendMessage(senderNumber, { text: pingText });
+                        break;
+                    case "3":
+                        await sock.sendMessage(senderNumber, { text: "Ini adalah bot WhatsApp_ untuk project Kompetegram" });
+                        break;
+                    default:
+                                       // Jika pesan yang masuk mengandung kata 'siapa' dan 'kamu'
+                            if (incomingMessages.includes('siapa') && incomingMessages.includes('kamu')) {
+                                // Kirim pesan balasan 'Saya Bot!'
+                                await sock.sendMessage(
                                 senderNumber,
-                                { text: result + "\n\n" },
+                                { text: "Saya Bot!" },
                                 { quoted: messages[0] },
                                 2000
-                            );
+                                    
+                                );      
+                            }else if (incomingMessages.toLowerCase() === 'kembali') {
+                                let text = 
+                                ' ✪✪✪ *ֆɨʟǟɦӄǟռ քɨʟɨɦ ʍɛռʊ :* ✪✪✪\n' +
+                                '\n*Menanyakan siapa kamu*\n' +
+                                '==> Masukkan "*_siapa kamu_*" \n' +
+                                '=҉=҉=҉=҉=҉=҉=҉=҉=҉=҉=҉=҉=҉=҉=҉=҉\n' +
+                                '1. Sekarang Tanggal Berapa?\n' +
+                                '2. Ping!\n' +
+                                '3. Tentang Bot\n' +
+                                '=҉=҉=҉=҉=҉=҉=҉=҉=҉=҉=҉=҉=҉=҉=҉=҉\n' +
+                                '*Untuk kembali dari pilihan*\n'+
+                                '==> Masukkan *_kembali_*\n' +
+                                '*Untuk keluar dari pilihan menu*\n'+
+                                '==> masukkan *_keluar_*';
+                              
+                           
+                            await sock.sendMessage(senderNumber, { text: text }, { quoted: messages[0] });
+                        } else if (incomingMessages.toLowerCase() === 'keluar') {
+                            // Kirim pesan untuk keluar dari menu
+                            await sock.sendMessage(senderNumber, { text: 'Terima kasih telah menggunakan bot WhatsApp ini.' });
+                        } else {
+                            // Kirim pesan jika tidak ada pilihan yang cocok
+                            await sock.sendMessage(senderNumber, { text: "Maaf, opsi yang Anda pilih tidak tersedia\nSilahkan masukkan *menu* untuk memilih menu" });
                         }
-                        main();
-                    }
+                        break;
+
                 }
-
-                //Kalo misalkan nanya via Group
-                if (isMessageFromGroup && isMessageMentionBot) {
-                    //Jika ada yang mengirim pesan mengandung kata 'siapa'
-                    if (incomingMessages.includes('siapa') && incomingMessages.includes('kamu')) {
-                        await sock.sendMessage(
-                            senderNumber,
-                            { text: "Saya Bot!" },
-                            { quoted: messages[0] },
-                            2000
-                        );
-                    } else {
-                        async function main() {
-                            const result = await generateResponse(incomingMessages);
-                            console.log(result);
-                            await sock.sendMessage(
-                                senderNumber,
-                                { text: result + "\n\n" },
-                                { quoted: messages[0] },
-                                2000
-                            );
-                        }
-                        main();
-                    }
-                }
-
-
+            }
+            
 
             } catch (error) {
                 console.log(error);
@@ -144,7 +138,6 @@ async function connectToWhatsApp() {
     });
 
 }
-
 connectToWhatsApp().catch((err) => {
     console.log("Ada Error: " + err);
 });
