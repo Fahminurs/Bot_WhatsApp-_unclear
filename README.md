@@ -1,5 +1,8 @@
 # Bot_WhatsApp-_unclear
-Project Kompetegram [ Bot WhatsAPP Gak jelas ]
+
+|~) _ _ . _  __|_  |/ _  _ _  _  _ _|_ _  _  _ _  _ _   |~  |~) _ _|_  \    /|_  _ _|_ _ /\ |~)|~)  /~_ _ |    . _ | _  _  ~|
+|~ | (_)|(/_(_ |   |\(_)| | ||_)(/_ | (/_(_|| (_|| | |  |   |_)(_) |    \/\/ | |(_| | _\/~~\|~ |~   \_/(_||<   |(/_|(_|_\   |
+       L|                    |            _|            |_                                                    L|           _|
 
 
 ![Preview](https://user-images.githubusercontent.com/125650472/230731075-aaa86e10-3cdb-4abf-98aa-ec95c43ff580.gif)
